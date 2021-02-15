@@ -1,0 +1,60 @@
+---
+Resources:
+  GraffanaEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: ap-south-1a
+      ImageId: ami-0cda377a1b884a1bc
+      InstanceType: t2.micro
+  EventRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: "detect-macie-finding"
+      Description: >-
+        A CloudWatch Event Rule that triggers on Amazon Macie findings. The
+        Event Rule can be used to trigger notifications or remediative actions
+        using AWS Lambda.
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt MyLogs.Arn
+          Id: target-id1
+        - Arn: !GetAtt LambdaFunc.Arn
+          Id: target-id2
+      EventPattern:
+        detail-type:
+          - Macie Finding
+        source:
+          - aws.macie
+  MyLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: "/aws/events/macieLogs"
+
+  LambdaFunc:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Role: arn:aws:iam::302394221410:role/cflambda-role
+      Runtime: python3.8
+      Code:
+        S3Bucket: "demoforcf"
+        S3Key: "lambda_function.zip"
+      FunctionName: "LambdaForMacie"
+  MacieCustomIdentidifiersForDate:
+    Type: AWS::Macie::CustomDataIdentifier
+    Properties:
+      Description: "Use to detect if there is any DOB or date of issue of any debit/credit card."
+      Name: "Date"
+      Regex: "(^(19|20)\\d\\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$)|(^(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\\d\\d$)"
+  MacieCustomIdentidifiersForCVV:
+    Type: AWS::Macie::CustomDataIdentifier
+    Properties:
+      Description: "Use to detect any CVV information found in the document"
+      Name: "CVV"
+      Regex: "^[0-9]{3}$"
+  MacieCustomIdentidifiersForCardPin:
+    Type: AWS::Macie::CustomDataIdentifier
+    Properties:
+      Description: "Use to detect if there is any card pin match found in the uploaded document"
+      Name: "Card Pin"
+      Regex: "^[0-9]{4}$"

@@ -1,0 +1,20 @@
+---
+Resources:
+  MacieCustomIdentidifiersForDate:
+    Type: AWS::Macie::CustomDataIdentifier
+    Properties:
+      Description: "Use to detect if there is any DOB or date of issue of any debit/credit card."
+      Name: "Date"
+      Regex: "(^(19|20)\\d\\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$)|(^(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\\d\\d$)"
+  MacieCustomIdentidifiersForCVV:
+    Type: AWS::Macie::CustomDataIdentifier
+    Properties:
+      Description: "Use to detect any CVV information found in the document"
+      Name: "CVV"
+      Regex: "^[0-9]{3}$"
+  MacieCustomIdentidifiersForCardPin:
+    Type: AWS::Macie::CustomDataIdentifier
+    Properties:
+      Description: "Use to detect if there is any card pin match found in the uploaded document"
+      Name: "Card Pin"
+      Regex: "^[0-9]{4}$"
